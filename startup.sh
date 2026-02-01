@@ -3,13 +3,13 @@
       apt-get update
 
       # Установка необходимых пакетов
-      apt-get install -y nginx php-fpm php-mysql wget curl tar
+      sudo apt-get install -y nginx php-fpm php-mysql wget curl tar
 
       # Запуск nginx
-      systemctl start nginx
+      sudo systemctl start nginx
 
       # Настройка сайта nginx
-      cat > /etc/nginx/sites-available/wordpress <<EOF
+      sudo cat > /etc/nginx/sites-available/wordpress <<EOF
       server {
           listen 80 default_server;
           root /var/www/wordpress;
@@ -39,22 +39,22 @@
 EOF
 
       # Включение сайта
-      rm -f /etc/nginx/sites-enabled/default
-      ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/
+      sudo rm -f /etc/nginx/sites-enabled/default
+      sudo ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/
 
       # Установка WordPress
-      wget https://wordpress.org/latest.tar.gz -O /tmp/latest.tar.gz
-      tar -xzf /tmp/latest.tar.gz -C /tmp
-      mv /tmp/wordpress /var/www/wordpress
+      sudo wget https://wordpress.org/latest.tar.gz -O /tmp/latest.tar.gz
+      sudo tar -xzf /tmp/latest.tar.gz -C /tmp
+      sudo mv /tmp/wordpress /var/www/wordpress
 
       # Установка прав
-      chown -R www-data:www-data /var/www/wordpress
+      sudo chown -R www-data:www-data /var/www/wordpress
 
       # Получение секретных ключей WordPress
-      KEYS=$(curl --silent https://api.wordpress.org/secret-key/1.1/salt/)
+      sudo KEYS=$(curl --silent https://api.wordpress.org/secret-key/1.1/salt/)
 
       # Настройка wp-config.php
-      cat > /var/www/wordpress/wp-config.php <<EOF
+      sudo cat > /var/www/wordpress/wp-config.php <<EOF
 <?php
 // * MySQL settings * //
 define('DB_NAME', '<DB_NAME>');
@@ -76,17 +76,17 @@ require_once(ABSPATH . 'wp-settings.php');
 EOF
 
       # Замените placeholders в wp-config.php на реальные значения
-      sed -i "s/<DB_NAME>/your_db_name/" /var/www/wordpress/wp-config.php
-      sed -i "s/<DB_USER>/your_db_user/" /var/www/wordpress/wp-config.php
-      sed -i "s/<DB_PASSWORD>/your_db_password/" /var/www/wordpress/wp-config.php
-      sed -i "s/<DB_HOST>/your_db_host/" /var/www/wordpress/wp-config.php
+      sudo sed -i "s/<DB_NAME>/your_db_name/" /var/www/wordpress/wp-config.php
+      sudo sed -i "s/<DB_USER>/your_db_user/" /var/www/wordpress/wp-config.php
+      sudo sed -i "s/<DB_PASSWORD>/your_db_password/" /var/www/wordpress/wp-config.php
+      sudo sed -i "s/<DB_HOST>/your_db_host/" /var/www/wordpress/wp-config.php
 
       # Вставка ключей
-      sed -i "/$KEYS/{
+      sudo sed -i "/$KEYS/{
         r /dev/stdin
         d
       }" /var/www/wordpress/wp-config.php
-      echo "$KEYS" >> /var/www/wordpress/wp-config.php
+      sudo echo "$KEYS" >> /var/www/wordpress/wp-config.php
 
       # Перезапуск служб
       sudo systemctl restart php8.1-fpm
