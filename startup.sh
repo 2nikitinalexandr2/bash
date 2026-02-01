@@ -1,16 +1,17 @@
-   #!/bin/bash
-      # Обновление системы
+ #!/bin/bash
+
       sudo apt-get update
-
-      # Установка необходимых пакетов
       sudo apt-get install -y nginx php-fpm php-mysql wget curl tar
-
-      # Запуск nginx
-      sudo systemctl start nginx
-
-      # Настройка сайта nginx
-      sudo cat > /etc/nginx/sites-available/wordpress <<EOF
-      server {
+      sudo service nginx start
+      sudo rm -f /etc/nginx/sites-enabled/default
+      sudo ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/
+      wget https://wordpress.org/latest.tar.gz -O /tmp/latest.tar.gz
+      sudo tar -xzf /tmp/latest.tar.gz -C /tmp
+      sudo mv /tmp/wordpress /var/www/wordpress
+      sudo chown -R www-data:www-data /var/www/wordpress
+      sudo wget -qO wpsucli https://git.io/vykgu && sudo chmod +x ./wpsucli && sudo install ./wpsucli /usr/local/bin/wpsucli
+      sudo bash -c 'cat << EOF >> /etc/nginx/sites-available/wordpress
+          server {
           listen 80 default_server;
           root /var/www/wordpress;
           index index.php;
@@ -29,32 +30,21 @@
 
           location ~ .php$ {
               try_files \$uri =404;
-              fastcgi_split_path_info ^(.+.php)(/.+)$;
+              fastcgi_split_path_info ^(.+.php)(/.+)\$;
               fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
               fastcgi_index index.php;
               fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
               include fastcgi_params;
           }
-      }
-EOF
+      }'
 
-      # Включение сайта
-      sudo rm -f /etc/nginx/sites-enabled/default
-      sudo ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/
+sudo cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
 
-      # Установка WordPress
-      sudo wget https://wordpress.org/latest.tar.gz -O /tmp/latest.tar.gz
-      sudo tar -xzf /tmp/latest.tar.gz -C /tmp
-      sudo mv /tmp/wordpress /var/www/wordpress
 
-      # Установка прав
-      sudo chown -R www-data:www-data /var/www/wordpress
+    # Получение секретных ключей WordPress
 
-      # Получение секретных ключей WordPress
-      sudo KEYS=$(curl --silent https://api.wordpress.org/secret-key/1.1/salt/)
-
-      # Настройка wp-config.php
-      sudo cat > /var/www/wordpress/wp-config.php <<EOF
+      KEYS=$(curl --silent https://api.wordpress.org/secret-key/1.1/salt/)
+sudo bash -c 'cat > /var/www/wordpress/wp-config.php <<EOF
 <?php
 // * MySQL settings * //
 define('DB_NAME', '<DB_NAME>');
@@ -72,22 +62,12 @@ define('WP_DEBUG', false);
 if ( !defined('ABSPATH') )
     define('ABSPATH', dirname(__FILE__) . '/');
 
-require_once(ABSPATH . 'wp-settings.php');
-EOF
+require_once(ABSPATH . 'wp-settings.php');'
 
-      # Замените placeholders в wp-config.php на реальные значения
-      sudo sed -i "s/<DB_NAME>/your_db_name/" /var/www/wordpress/wp-config.php
-      sudo sed -i "s/<DB_USER>/your_db_user/" /var/www/wordpress/wp-config.php
-      sudo sed -i "s/<DB_PASSWORD>/your_db_password/" /var/www/wordpress/wp-config.php
-      sudo sed -i "s/<DB_HOST>/your_db_host/" /var/www/wordpress/wp-config.php
 
-      # Вставка ключей
-      sudo sed -i "/$KEYS/{
-        r /dev/stdin
-        d
-      }" /var/www/wordpress/wp-config.php
-      sudo echo "$KEYS" >> /var/www/wordpress/wp-config.php
-
-      # Перезапуск служб
-      sudo systemctl restart php8.1-fpm
-      sudo systemctl restart nginx
+   sudo sed -i "s/database_name_here/wp-mysql-tutorial-db/g" /var/www/wordpress/wp-config.php
+   sudo sed -i "s/username_here/wordpress/g" /var/www/wordpress/wp-config.php
+   sudo sed -i "s/password_here/password/g" /var/www/wordpress/wp-config.php
+   sudo sed -i "s/localhost/rc1a-fsvb58b2qqorjhhv.mdb.yandexcloud.net/" /var/www/wordpress/wp-config.php
+     sudo systemctl restart php8.1-fpm
+ sudo systemctl restart nginx
