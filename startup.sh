@@ -42,27 +42,10 @@ sudo cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
 
 
     # Получение секретных ключей WordPress
-
-      KEYS=$(curl --silent https://api.wordpress.org/secret-key/1.1/salt/)
-sudo bash -c 'cat > /var/www/wordpress/wp-config.php <<EOF
-<?php
-// * MySQL settings * //
-define('DB_NAME', '<DB_NAME>');
-define('DB_USER', '<DB_USER>');
-define('DB_PASSWORD', '<DB_PASSWORD>');
-define('DB_HOST', '<DB_HOST>');
-
-// * Authentication Unique Keys and Salts * //
-$KEYS
-
-// * Other settings * //
-$table_prefix  = 'wp_';
-define('WP_DEBUG', false);
-
-if ( !defined('ABSPATH') )
-    define('ABSPATH', dirname(__FILE__) . '/');
-
-require_once(ABSPATH . 'wp-settings.php');'
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+sudo mv wp-cli.phar /usr/local/bin/wp
+sudo -u www-data  -- wp config shuffle-salts --path="/var/www/wordpress"
 
 
    sudo sed -i "s/database_name_here/wp-mysql-tutorial-db/g" /var/www/wordpress/wp-config.php
