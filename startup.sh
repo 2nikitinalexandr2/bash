@@ -68,6 +68,6 @@ require_once(ABSPATH . 'wp-settings.php');'
    sudo sed -i "s/database_name_here/wp-mysql-tutorial-db/g" /var/www/wordpress/wp-config.php
    sudo sed -i "s/username_here/wordpress/g" /var/www/wordpress/wp-config.php
    sudo sed -i "s/password_here/password/g" /var/www/wordpress/wp-config.php
-   sudo sed -i "s/localhost/rc1a-fsvb58b2qqorjhhv.mdb.yandexcloud.net/" /var/www/wordpress/wp-config.php
+   sudo sed -i "s/localhost/$MYSQL_HOST_FQDN/" /var/www/wordpress/wp-config.php
      sudo systemctl restart php8.1-fpm
  sudo systemctl restart nginx
