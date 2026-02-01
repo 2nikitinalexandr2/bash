@@ -17,7 +17,7 @@
           server_name _;  # Замените на ваше DNS
 
           location / {
-              try_files $uri $uri/ =404;
+              try_files \$uri \$uri/ =404;
           }
 
           error_page 404 /404.html;
@@ -28,7 +28,7 @@
           }
 
           location ~ .php$ {
-              try_files $uri =404;
+              try_files \$uri =404;
               fastcgi_split_path_info ^(.+.php)(/.+)$;
               fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
               fastcgi_index index.php;
