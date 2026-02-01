@@ -1,6 +1,6 @@
    #!/bin/bash
       # Обновление системы
-      apt-get update
+      sudo apt-get update
 
       # Установка необходимых пакетов
       sudo apt-get install -y nginx php-fpm php-mysql wget curl tar
