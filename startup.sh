@@ -45,6 +45,7 @@ sudo cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 chmod +x wp-cli.phar
 sudo mv wp-cli.phar /usr/local/bin/wp
+sudo chmod 777 -R /var/www/wordpress/*
 sudo -u www-data  -- wp config shuffle-salts --path="/var/www/wordpress"
 
 
